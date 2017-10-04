@@ -17,11 +17,9 @@ public class Bank {
     private final int initialBalance;
     private final int numAccounts;
     private boolean open;
-    public Lock accountLock;
-    public Condition testing;
     public Semaphore transferingSem;
-    private int testCount;
-
+    public int testCount;
+    private Thread testThread;
     public Bank(int numAccounts, int initialBalance) {
         open = true;
         this.initialBalance = initialBalance;
@@ -31,10 +29,8 @@ public class Bank {
             accounts[i] = new Account(this, i, initialBalance);
         }
         ntransacts = 0;
-	accountLock=new ReentrantLock();
-	testing = accountLock.newCondition();
 	transferingSem=new Semaphore(10);
-	testCount=0;
+	testCount=0;	
     }
 
     public void transfer(int from, int to, int amount) {
@@ -42,9 +38,11 @@ public class Bank {
         if (!open) return;
 	try{
 	    transferingSem.acquire();
+	    ///////////CS START////////////////////
 	    if (accounts[from].withdraw(amount)) {
 		accounts[to].deposit(amount);
 	    }
+	    //////////CS END///////////////////
 	}
 	catch(InterruptedException e){}
 	finally{transferingSem.release();}
@@ -52,29 +50,8 @@ public class Bank {
     }
 
     public void test() {
-        int sum = 0;
-	
-	try{transferingSem.acquire(10);
-	////////////////CS START////////////////
-        for (Account account : accounts) {
-            System.out.printf("%s %s%n", 
-                    Thread.currentThread().toString(), account.toString());
-            sum += account.getBalance();
-        }
-	////////////////CS END/////////////////
-	}catch(InterruptedException e){}
-	finally{transferingSem.release(10);}
-        
-	System.out.println(Thread.currentThread().toString() + 
-                "test " + testCount++ +" Sum: " + sum);
-        if (sum != numAccounts * initialBalance) {
-            System.out.println(Thread.currentThread().toString() + 
-                    " Money was gained or lost");
-            System.exit(1);
-        } else {
-            System.out.println(Thread.currentThread().toString() + 
-                    " The bank is in balance");
-        }
+        testThread=new testThread(this,accounts, numAccounts,initialBalance);
+	testThread.start();
     }
 
     public int size() {
