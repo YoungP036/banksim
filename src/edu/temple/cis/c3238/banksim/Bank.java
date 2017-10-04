@@ -1,9 +1,10 @@
 package edu.temple.cis.c3238.banksim;
-
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+/**
+ * My implementation leverages the fact that semaphores can be initialized
+ * with multiple charges. By initializing as many charges as we have threads
+ * I can provide the desired sync using a single object.
+ */
 
 /**
  * @author Cay Horstmann
@@ -29,7 +30,7 @@ public class Bank {
             accounts[i] = new Account(this, i, initialBalance);
         }
         ntransacts = 0;
-	transferingSem=new Semaphore(10);
+	transferingSem=new Semaphore(this.numAccounts);
 	testCount=0;	
     }
 
