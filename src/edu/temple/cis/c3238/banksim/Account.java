@@ -1,9 +1,5 @@
 package edu.temple.cis.c3238.banksim;
 
-/**
- * @author Cay Horstmann
- * @author Modified by Paul Wolfgang
- */
 public class Account {
 
     private volatile int balance;
@@ -24,7 +20,7 @@ public class Account {
         while (myBank.isOpen() && amount >= balance) {
             try {
                 wait();
-            } catch (InterruptedException ex) { /* ignore */ }
+            } catch (InterruptedException ex) {}
         }
     }
 

@@ -1,9 +1,5 @@
 package edu.temple.cis.c3238.banksim;
 
-/**
- * @author Cay Horstmann
- * @author Modified by Paul Wolfgang
- */
 public class BankSimMain {
 
     public static final int NACCOUNTS = 10;

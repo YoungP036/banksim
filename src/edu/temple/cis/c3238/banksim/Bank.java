@@ -5,13 +5,7 @@ import java.util.concurrent.Semaphore;
  * with multiple charges. By initializing as many charges as we have threads
  * I can provide the desired sync using a single object.
  */
-
-/**
- * @author Cay Horstmann
- * @author Modified by Paul Wolfgang
- */
 public class Bank {
-
     public static final int NTEST = 10;
     private final Account[] accounts;
     private long ntransacts = 0;
@@ -19,8 +13,10 @@ public class Bank {
     private final int numAccounts;
     private boolean open;
     public Semaphore transferingSem;
+//    public ReentrantReadWriteLock lock;
     public int testCount;
     private Thread testThread;
+    
     public Bank(int numAccounts, int initialBalance) {
         open = true;
         this.initialBalance = initialBalance;
@@ -30,7 +26,7 @@ public class Bank {
             accounts[i] = new Account(this, i, initialBalance);
         }
         ntransacts = 0;
-	transferingSem=new Semaphore(this.numAccounts,true);
+	transferingSem=new Semaphore(this.numAccounts);
 	testCount=0;	
     }
 
@@ -39,20 +35,22 @@ public class Bank {
         if (!open) return;
 	try{
 	    transferingSem.acquire();
-	    ///////////CS START////////////////////
+	    ///////////Critical Section START////////////////////
 	    if (accounts[from].withdraw(amount)) {
 		accounts[to].deposit(amount);
 	    }
-	    //////////CS END///////////////////
+	    //////////Critical Section END///////////////////
 	}
 	catch(InterruptedException e){}
-	finally{transferingSem.release();}
+	finally{
+	    transferingSem.release();
+	}
         if (shouldTest()) test();
     }
 
     public void test() {
         testThread=new testThread(this,accounts, numAccounts,initialBalance);
-	testThread.start();
+		testThread.start();
     }
 
     public int size() {
