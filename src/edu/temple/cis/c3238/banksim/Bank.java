@@ -30,7 +30,7 @@ public class Bank {
             accounts[i] = new Account(this, i, initialBalance);
         }
         ntransacts = 0;
-	transferingSem=new Semaphore(this.numAccounts);
+	transferingSem=new Semaphore(this.numAccounts,true);
 	testCount=0;	
     }
 
